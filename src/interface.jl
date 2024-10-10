@@ -219,9 +219,9 @@ function associate_rhs_sparse!(mumps::Mumps{T}, rhs::AbstractMatrix) where {T}
   mumps.nz_rhs = length(rhs.nzval)
   mumps.nrhs = size(rhs, 2)
 
-  rhs_sparse = convert.(T, rhs.nzval)
-  irhs_sparse = convert.(MUMPS_INT, rhs.rowval)
-  irhs_ptr = convert.(MUMPS_INT, rhs.colptr)
+  rhs_sparse = convert(Vector{T}, rhs.nzval)
+  irhs_sparse = convert(Vector{MUMPS_INT}, rhs.rowval)
+  irhs_ptr = convert(Vector{MUMPS_INT}, rhs.colptr)
 
   mumps.rhs_sparse = pointer(rhs_sparse)
   mumps.irhs_sparse = pointer(irhs_sparse)
@@ -237,7 +237,7 @@ function associate_rhs_sparse!(mumps::Mumps{T}, rhs::AbstractMatrix) where {T}
 end
 
 function associate_rhs_dense!(mumps::Mumps{T}, rhs::AbstractMatrix) where {T}
-  y = convert(Matrix{T}, rhs)[:]
+  y = convert(Matrix{T}, rhs)
   mumps.rhs = pointer(y)
   mumps.lrhs = size(rhs, 1)
   mumps.nrhs = size(rhs, 2)
@@ -245,7 +245,7 @@ function associate_rhs_dense!(mumps::Mumps{T}, rhs::AbstractMatrix) where {T}
   return mumps
 end
 
-associate_rhs!(mumps::Mumps, rhs::AbstractVector) = associate_rhs!(mumps, repeat(rhs, 1, 1))
+associate_rhs!(mumps::Mumps, rhs::AbstractVector) = associate_rhs!(mumps, reshape(rhs, length(rhs), 1))
 
 """
     get_rhs!(x,mumps)
